@@ -1,7 +1,8 @@
 <#
 .SYNOPSIS
 This script retrieves devices managed in Microsoft Intune that belong to a specified Entra ID group. 
-It can display the results in the PowerShell console or export them to a CSV file.
+It can display the results in the PowerShell console, export them to a CSV file, or perform both actions 
+based on the provided parameters.
 
 .DESCRIPTION
 The script connects to Microsoft Graph using the Microsoft.Graph.Authentication module, 
@@ -19,21 +20,25 @@ Specifies the path to export the matching devices to a CSV file.
 If not specified, the default path is "C:\devices.csv".
 
 .EXAMPLE
-.\script.ps1 -group "GroupName" -list
+.\Device_upn.ps1 -group "GroupName" -list
 Displays the matching devices in the PowerShell console for the specified group.
 
 .EXAMPLE
-.\script.ps1 -group "GroupName" -outputfile "D:\output.csv"
+.\Device_upn.ps1 -group "GroupName" -outputfile "D:\output.csv"
 Exports the matching devices to "D:\output.csv" for the specified group.
 
 .EXAMPLE
-.\script.ps1 -group "GroupName" -list -outputfile "D:\output.csv"
+.\Device_upn.ps1 -group "GroupName" -list -outputfile "D:\output.csv"
 Displays the matching devices in the console and exports them to "D:\output.csv" for the specified group.
 
 .NOTES
 Ensure that the Microsoft.Graph.Authentication module is installed and that you have the necessary permissions 
 to access group and device information in Microsoft Graph.
 
+The script will only perform the actions explicitly specified by the user. For example:
+- If `-list` is provided, it will only display the results in the console.
+- If `-outputfile` is provided, it will only export the results to a CSV file.
+- If both `-list` and `-outputfile` are provided, it will perform both actions.
 #>
 
 param (
@@ -45,10 +50,6 @@ param (
     [string]$outputfile = "C:\devices.csv"
 )
 
-# Remove existing CSV file if outputfile is specified
-if ($outputfile -and (Test-Path -Path $outputfile)) { 
-    Remove-Item $outputfile -Force 
-}
 
 # Ensure Microsoft Graph module is installed and imported
 if (!(Get-Module -ListAvailable -Name Microsoft.Graph.Authentication)) {
@@ -58,18 +59,18 @@ Import-Module Microsoft.Graph.Authentication -ErrorAction Stop
 
 # Authenticate with Microsoft Graph
     
-    if (-not (Get-MgContext)) {
-        Write-Host "Authenticating with MS Graph..." -ForegroundColor Yellow
-        Connect-MgGraph -Scopes @(
-            "GroupMember.Read.All", 
-            "Directory.Read.All", 
-            "Group.Read.All", 
-            "Group.ReadWrite.All", 
-            "GroupMember.ReadWrite.All", 
-            "DeviceManagementManagedDevices.Read.All",
-            "DeviceManagementConfiguration.Read.All"
-        )
-    }
+if (-not (Get-MgContext)) {
+    Write-Host "Authenticating with MS Graph..." -ForegroundColor Yellow
+    Connect-MgGraph -Scopes @(
+        "GroupMember.Read.All", 
+        "Directory.Read.All", 
+        "Group.Read.All", 
+        "Group.ReadWrite.All", 
+        "GroupMember.ReadWrite.All", 
+        "DeviceManagementManagedDevices.Read.All",
+        "DeviceManagementConfiguration.Read.All"
+    )
+}
 
 
 # Retrieve Group ID from Group Name
@@ -101,16 +102,17 @@ while ($deviceResponse.'@odata.nextLink') {
 # Collect matching devices
 $matchingDevices = @()
 foreach ($member in $groupmembers) {
-    if ($member.deviceid) { # Ensure the member has a device ID
+    if ($member.deviceid) {
+        # Ensure the member has a device ID
         foreach ($device in $devices) {
             if ($member.deviceid -eq $device.azureADDeviceId) {
                 $matchingDevices += [pscustomobject]@{
-                    'Device Name'   = $device.deviceName
-                    'Serial Number' = $device.serialNumber
+                    'Device Name'      = $device.deviceName
+                    'Serial Number'    = $device.serialNumber
                     'Compliance State' = $device.complianceState
-                    'UPN'           = $device.userPrincipalName
-                    'Username'      = $device.userDisplayName
-                    'E mail'        = $device.emailAddress
+                    'UPN'              = $device.userPrincipalName
+                    'Username'         = $device.userDisplayName
+                    'E mail'           = $device.emailAddress
                 }
             }
         }
@@ -121,13 +123,25 @@ foreach ($member in $groupmembers) {
 
 # Output results
 if ($matchingDevices.Count -gt 0) {
-    if ($list) {
+    if ($list -and -not $PSBoundParameters.ContainsKey('outputfile')) {
+        # Only list the results
         Write-Host "Matching Devices:" -ForegroundColor Cyan
         $matchingDevices | Format-Table -AutoSize
+        Exit 0
     }
-    if ($outputfile) {
+    elseif ($PSBoundParameters.ContainsKey('outputfile') -and -not $list) {
+        # Only export to CSV
         $matchingDevices | Export-Csv -Path $outputfile -NoTypeInformation
-        Write-Host "Device information exported to" -ForegroundColor Green -NoNewline; Write-Host " $outputfile" -ForegroundColor Cyan
+        Write-Host "Device information exported to" -ForegroundColor Green -NoNewline; Write-Host " $outputfile" -ForegroundColor Yellow
+        Exit 0
+    }
+    elseif ($list -and $PSBoundParameters.ContainsKey('outputfile')) {
+        # Do both actions
+        Write-Host "Matching Devices:" -ForegroundColor Cyan
+        $matchingDevices | Format-Table -AutoSize
+        $matchingDevices | Export-Csv -Path $outputfile -NoTypeInformation
+        Write-Host "Device information exported to" -ForegroundColor Green -NoNewline; Write-Host " $outputfile" -ForegroundColor Yellow
+        Exit 0
     }
 } else {
     Write-Host "No matching devices found." -ForegroundColor Red
