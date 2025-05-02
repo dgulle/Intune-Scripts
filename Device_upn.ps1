@@ -42,11 +42,13 @@ The script will only perform the actions explicitly specified by the user. For e
 #>
 
 param (
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $true, HelpMessage = "Specify the name of the Entra ID group to retrieve devices for.")]
     [string]$group,
 
+    [Parameter(HelpMessage = "Use this switch to display the matching devices in the PowerShell console.")]
     [switch]$list,
 
+    [Parameter(HelpMessage = "Specify the file path to export the matching devices to a CSV file. Default is 'C:\devices.csv'.")]
     [string]$outputfile = "C:\devices.csv"
 )
 
