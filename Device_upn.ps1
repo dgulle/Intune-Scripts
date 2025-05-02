@@ -143,6 +143,7 @@ if ($matchingDevices.Count -gt 0) {
         Write-Host "Device information exported to" -ForegroundColor Green -NoNewline; Write-Host " $outputfile" -ForegroundColor Yellow
         Exit 0
     }
-} else {
+}
+else {
     Write-Host "No matching devices found." -ForegroundColor Red
 }
