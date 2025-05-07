@@ -15,11 +15,6 @@ Filters devices where the name contains a specific substring.
 Example:
     .\Set_Primary_User.ps1 -DeviceContains "Device"
 
-.PARAMETER DeviceIn
-Filters devices by a comma-separated list of device names.
-Example:
-    .\Set_Primary_User.ps1 -DeviceIn "Device1,Device2,Device3"
-
 .PARAMETER All
 Retrieves all devices running the Windows operating system.
 Example:
