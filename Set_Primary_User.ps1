@@ -30,6 +30,9 @@ Example:
 - Ensure that the user running the script has appropriate permissions in Microsoft Intune and Microsoft Graph API.
 - At least one parameter (`-Device`, `-DeviceContains`, or `-All`) must be specified for the script to run.
 
+- More information can be found at:
+https://zerototrust.tech/intune-primary-user-mix-up/
+
 .EXAMPLES
 # Set the primary user for a specific device
 .\Set_Primary_User.ps1 -Device "Device123"
