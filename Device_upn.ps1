@@ -35,6 +35,9 @@ Displays the matching devices in the console and exports them to "D:\output.csv"
 Ensure that the Microsoft.Graph.Authentication module is installed and that you have the necessary permissions 
 to access group and device information in Microsoft Graph.
 
+More information can be found at:
+https://zerototrust.tech/need-to-know-entra-device-group-info-this-script-has-your-back/
+
 The script will only perform the actions explicitly specified by the user. For example:
 - If `-list` is provided, it will only display the results in the console.
 - If `-outputfile` is provided, it will only export the results to a CSV file.
