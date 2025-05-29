@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Retrieves Entra (Azure AD) Device IDs for a list of device names, exports the results to CSV, and optionally adds the devices to an Entra group.
+    Retrieves Entra (Azure AD) Device IDs for a list of device names, exports the results to CSV (optional), and optionally adds the devices to an Entra group.
 
 .DESCRIPTION
-    This script accepts a comma-separated list of device names or a CSV file containing device names, queries Entra ID (Azure AD) for their Device IDs, and exports the results (Device Name and Device ID) to a specified CSV file. If a Group ID is provided, the script will also add the found devices to the specified Entra group.
+    This script accepts a comma-separated list of device names or a CSV file containing device names, queries Entra ID (Azure AD) for their Device IDs, and outputs the results (Device Name and Device ID) to a specified CSV file or to the console. If a Group ID is provided, the script will also add the found devices to the specified Entra group.
 
 .PARAMETER DeviceNames
     Comma-separated list of device names (e.g., "PC1,PC2,PC3").
@@ -15,10 +15,10 @@
     (Optional) The Entra (Azure AD) Group ID to which the devices should be added.
 
 .PARAMETER OutputCsvPath
-    Path to the output CSV file where results will be saved.
+    (Optional) Path to the output CSV file where results will be saved. If not specified, results are shown in the console.
 
 .EXAMPLE
-    .\Get-EntraDeviceID.ps1 -DeviceNames "PC1,PC2" -OutputCsvPath "output.csv"
+    .\Get-EntraDeviceID.ps1 -DeviceNames "PC1,PC2"
 
 .EXAMPLE
     .\Get-EntraDeviceID.ps1 -DeviceCsvPath "devices.csv" -GroupId "<group-guid>" -OutputCsvPath "output.csv"
@@ -34,8 +34,8 @@ param(
     [Parameter(Mandatory=$false)]
     [string]$GroupId, # Entra Group ID
 
-    [Parameter(Mandatory=$true)]
-    [string]$OutputCsvPath # Output CSV path
+    [Parameter(Mandatory=$false)]
+    [string]$OutputCsvPath # Output CSV path (optional)
 )
 
 if (-not $DeviceNames -and -not $DeviceCsvPath) {
@@ -93,7 +93,11 @@ foreach ($name in $allDeviceNames) {
     }
 }
 
-# Export results
-$results | Export-Csv -Path $OutputCsvPath -NoTypeInformation
-
-Write-Host "Export complete: $OutputCsvPath"
+# Output results
+if ($OutputCsvPath) {
+    $results | Export-Csv -Path $OutputCsvPath -NoTypeInformation
+    Write-Host "Export complete: $OutputCsvPath"
+} else {
+    Write-Host "`nDevice Name`tDevice ID"
+    $results | ForEach-Object { Write-Host "$($_.DeviceName)`t$($_.DeviceId)" }
+}
