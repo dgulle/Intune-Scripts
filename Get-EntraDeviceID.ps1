@@ -15,10 +15,10 @@
     (Optional) The Entra (Azure AD) Group ID to which the devices should be added.
 
 .PARAMETER OutputCsvPath
-    (Optional) Path to the output CSV file where results will be saved. If not specified, results are shown in the console.
+    Path to the output CSV file where results will be saved.
 
 .EXAMPLE
-    .\Get-EntraDeviceID.ps1 -DeviceNames "PC1,PC2"
+    .\Get-EntraDeviceID.ps1 -DeviceNames "PC1,PC2" -OutputCsvPath "output.csv"
 
 .EXAMPLE
     .\Get-EntraDeviceID.ps1 -DeviceCsvPath "devices.csv" -GroupId "<group-guid>" -OutputCsvPath "output.csv"
@@ -34,8 +34,8 @@ param(
     [Parameter(Mandatory=$false)]
     [string]$GroupId, # Entra Group ID
 
-    [Parameter(Mandatory=$false)]
-    [string]$OutputCsvPath # Output CSV path (optional)
+    [Parameter(Mandatory=$true)]
+    [string]$OutputCsvPath # Output CSV path (mandatory in this version)
 )
 
 if (-not $DeviceNames -and -not $DeviceCsvPath) {
@@ -93,11 +93,7 @@ foreach ($name in $allDeviceNames) {
     }
 }
 
-# Output results
-if ($OutputCsvPath) {
-    $results | Export-Csv -Path $OutputCsvPath -NoTypeInformation
-    Write-Host "Export complete: $OutputCsvPath"
-} else {
-    Write-Host "`nDevice Name`tDevice ID"
-    $results | ForEach-Object { Write-Host "$($_.DeviceName)`t$($_.DeviceId)" }
-}
+# Export results
+$results | Export-Csv -Path $OutputCsvPath -NoTypeInformation
+
+Write-Host "Export complete: $OutputCsvPath"
