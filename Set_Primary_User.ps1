@@ -55,7 +55,7 @@ param (
 )
 
 # Ensure at least one parameter is provided
-if (-not $Device -and -not $DeviceContains -and -not $DeviceIn -and -not $All) {
+if (-not $Device -and -not $DeviceContains -and -not $All) {
     Write-Error "You must specify at least one of the following parameters: -Device, -DeviceContains, or -All."
     exit
 }
@@ -92,7 +92,7 @@ Write-Host "Filter Query: $filter"
 
 # Validate the filter query
 if (-not $filter) {
-    Write-Error "The filter query could not be constructed. Ensure that one of the parameters (-Device, -DeviceContains, -DeviceIn, or -All) is specified and valid."
+    Write-Error "The filter query could not be constructed. Ensure that one of the parameters (-Device, -DeviceContains, or -All) is specified and valid."
     exit
 }
 
@@ -137,17 +137,16 @@ foreach ($d in $devices) {
     Write-Host "Processing device: $($d.DeviceName)" -ForegroundColor Green
     # Get the last logged in user
     $lastLoggedInUser = $d | Select-Object -ExpandProperty UsersLoggedOn
-}
 
-# Set the primary user
-if ($lastLoggedInUser) {
-    # Endpoint URL for setting the primary user
-    $uri = "https://graph.microsoft.com/beta/deviceManagement/managedDevices(`'$($d.Id)`')/users/`$ref"
+    if ($lastLoggedInUser) {
+        # Endpoint URL for setting the primary user
+        $uri = "https://graph.microsoft.com/beta/deviceManagement/managedDevices(`'$($d.Id)`')/users/`$ref"
 
-    $Body = @{ "@odata.id" = "https://graph.microsoft.com/beta/users/$($lastLoggedInUser.UserId)" } | ConvertTo-Json
-    $Method = "POST"
+        $Body = @{ "@odata.id" = "https://graph.microsoft.com/beta/users/$($lastLoggedInUser.UserId)" } | ConvertTo-Json
 
-    Invoke-MgGraphRequest -Method $Method -Uri $uri -Body $Body
-} else {
-    Write-Warning "No logged-in user found for device: $($d.DeviceName)"
+        Invoke-MgGraphRequest -Method POST -Uri $uri -Body $Body
+    }
+    else {
+        Write-Warning "No logged-in user found for device: $($d.DeviceName)"
+    }
 }
