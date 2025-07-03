@@ -6,9 +6,6 @@
     This script is designed to be executed as SYSTEM and iterates through all user profiles on the system, excluding default, public, and other non-real profiles. 
     It identifies the `file.config` file for each profile, applies predefined modifications, and logs all operations, including errors and skipped profiles.
 
-.PARAMETER None
-    This script does not accept any parameters.
-
 .NOTES
     Version: 1.0
     - Ensure the script is executed in a 64-bit PowerShell environment for compatibility.
