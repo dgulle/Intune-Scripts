@@ -1,21 +1,20 @@
 <# 
-    Purpose:  This script updates the `file.config` file located in the `AppData\Roaming` directory for all real user profiles on a Windows machine. 
-    It is designed to be run as SYSTEM, and will iterate through each user profile to apply necessary changes to their respective configuration files.
-    This can be used to install Win32 apps as SYSTEM, but still modify the user profile settings.
+.SYNOPSIS
+    Updates the `file.config` file located in the `AppData\Roaming` directory for all real user profiles on a Windows machine.
 
-    Synopsis:
-    - Discovers all user profiles on the system, excluding default, public, and other non-real profiles.
-    - Generates the full path to the `file.config` file for each user profile.
-    - Reads the content of each `file.config` file and applies modifications based on predefined rules.
-    - Logs all operations, including discovered profiles, processed files, and any errors encountered.
-    - Skips profiles or files that are missing or inaccessible.
+.DESCRIPTION
+    This script is designed to be executed as SYSTEM and iterates through all user profiles on the system, excluding default, public, and other non-real profiles. 
+    It identifies the `file.config` file for each profile, applies predefined modifications, and logs all operations, including errors and skipped profiles.
 
-    Usage:
-    - Deploy via Intune as SYSTEM to ensure access to all user profiles.
+.PARAMETER None
+    This script does not accept any parameters.
+
+.NOTES
+    Version: 1.0
     - Ensure the script is executed in a 64-bit PowerShell environment for compatibility.
-    #>
+    - Deploy via Intune as SYSTEM to ensure access to all user profiles.
+#>
 
-# Configurable variables
 # Define the path to the configuration file relative to each user profile
 $ConfigFile = 'AppData\Roaming\file.config'
 
@@ -24,7 +23,6 @@ $LogFolder = 'C:\ProgramData\IntuneScripts'
 $LogPath = Join-Path $LogFolder 'FileConfigUpdate.log'
 if (-not (Test-Path $LogFolder)) { New-Item -ItemType Directory -Path $LogFolder -Force | Out-Null }
 
-# Start transcript for logging
 Start-Transcript -Path $LogPath -Append -Force
 
 # Grab real profile paths
