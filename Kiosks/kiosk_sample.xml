@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<AssignedAccessConfiguration xmlns="http://schemas.microsoft.com/AssignedAccess/2017/config"
+    xmlns:win11="http://schemas.microsoft.com/AssignedAccess/2022/config"
+    xmlns:rs5="http://schemas.microsoft.com/AssignedAccess/201810/config">
+    <Profiles>
+        <Profile Id="{66534d17-a361-445c-9199-ddea679e686d}">
+            <AllAppsList>
+                <AllowedApps>
+                    <!-- MS Edge is setup to autolaunch mysite.domain.org-->
+                    <App DesktopAppPath="C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" 
+                    rs5:AutoLaunch="true" 
+                    rs5:AutoLaunchArguments="https://mysite.domain.org" />
+                    <!-- This is our fancy app-->
+                    <App DesktopAppPath="%PROGRAMFILES%\Some App\app.exe" />
+                    <App DesktopAppPath="%PROGRAMFILES%\Another App\app.bat" />
+
+                    <!-- Company Application-->
+                    <App DesktopAppPath="C:\Company Custom\another_app.EXE" />
+
+                    <!-- Remove these after testing-->
+                    <App DesktopAppPath="C:\Windows\System32\eventvwr.exe" />
+                    <App DesktopAppPath="%SystemRoot%\System32\mmc.exe" />
+                    <App DesktopAppPath="%SystemRoot%\System32\notepad.exe" />
+                    <App DesktopAppPath="C:\windows\system32\cmd.exe" />
+                </AllowedApps>
+            </AllAppsList>
+            <win11:StartPins>
+                <![CDATA[  
+          { "pinnedList":[
+            {"desktopAppLink":"%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\File Explorer.lnk"},
+            {"desktopAppLink":"%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Command Prompt.lnk"},
+            {"desktopAppLink":"%ProgramData%\\Microsoft\\Windows\\Start Menu\\Programs\\Company\\Company App.lnk"},
+            {"desktopAppLink":"%ProgramData%\\Microsoft\\Windows\\Start Menu\\Programs\\Company\\Fancy App.lnk"}
+          ] }
+        ]]>
+            </win11:StartPins>
+            <Taskbar ShowTaskbar="true"/>
+        </Profile>
+    </Profiles>
+    <Configs>
+        <Config>
+            <AutoLogonAccount rs5:DisplayName="Kiosk User"/>
+            <DefaultProfile Id="{66534d17-a361-445c-9199-ddea679e686d}"/>
+        </Config>
+    </Configs>
+</AssignedAccessConfiguration>
